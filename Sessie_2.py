@@ -1,4 +1,9 @@
 # de code ziet er zeer netjes uit, 1 dingetje nog, jullie code runt voor 100 stappen, niet games.
+
+
+# de "+.000001" in regel 66 is in dit geval niet nodig, maar het is zo klein dat het ook geen kwaad kan.
+# goed bezig dat jullie de type printen, dat kan vaak erg helpen!
+
 import gym
 import numpy as np
 import tensorflow as tf
