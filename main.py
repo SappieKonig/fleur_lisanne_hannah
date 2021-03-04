@@ -1,3 +1,8 @@
+# mooie indeling! Klein dingetje, als je iets in verschillende files zet, moet elke files alles importeren dat in de
+# file gebruikt wordt
+
+# in andere woorden: import numpy as np in funcs.py
+
 
 import gym
 import random

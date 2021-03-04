@@ -1,3 +1,5 @@
+import numpy as np
+
 def decay(rewards, decay_factor):
     """
     Berekent de echte rewards aan de hand van de verkregen rewards van een episode op elk tijdstip en een decay_factor
