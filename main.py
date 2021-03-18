@@ -84,6 +84,7 @@ for __ in range(10):
 
         with tf.GradientTape() as tape:
             predictions = agent(obs_split[s])
+
             loss = tf.keras.losses.mse(action_split[s], predictions)
             loss = loss * decay_split[s]
 
