@@ -15,25 +15,26 @@ from fleur_lisanne_hannah.models import get_model
 
 env = gym.make("CartPole-v0")
 
-optimizer = tf.keras.optimizers.Adam(3e-5)
+
 aantal_stappen = []
-batch_size = 20
+batch_size = 36
 epochs = 100
-for __ in range(10):
+episodes = 25
+learning_rate = 3e-4
+optimizer = tf.keras.optimizers.Adam(learning_rate)
+agent = get_model()
+
+for _ in range(epochs):
 
     env.reset()
-    done = False
     observation_all, reward_all, is_done_all, info_all, action_all = [], [], [], [], []
     observation_t, reward_t, is_done_t, info_t, action_t = [], [], [], [], []
 
-
-
-    agent = get_model()
-
-    for i in range(epochs):
+    for i in range(episodes):
         observation_i = env.reset()
         reward_i = 1
         info_i = {}
+        done = False
 
         while not done:
             observation_t.append(observation_i)
@@ -41,7 +42,7 @@ for __ in range(10):
             is_done_t.append(done)
             info_t.append(info_i)
 
-            predictions = agent.predict(observation_i.reshape((1,-1)))[0][0]
+            predictions = agent.predict(observation_i.reshape((1, -1)))[0][0]
             if predictions <= random.random():
                 action = 0
             else:
@@ -49,9 +50,7 @@ for __ in range(10):
             observation_i, reward_i, done, info_i = env.step(action)
             action_t.append(action)
 
-
-
-            #env.render()
+            # env.render()
             if done:
                 print("aantal stappen: ", len(observation_t))
                 aantal_stappen.append(len(observation_t))
@@ -61,7 +60,6 @@ for __ in range(10):
                 info_all.append(info_t)
                 action_all.append(action_t)
                 observation_t, reward_t, is_done_t, info_t, action_t = [], [], [], [], []
-        done = False
 
 
     observation_memory = np.concatenate(observation_all)
@@ -71,17 +69,16 @@ for __ in range(10):
     # niet plat slaan, want je wilt weten welke potje en je moet normaliseren)
     decayed_reward = decay_and_normalize(reward_all, 0.97)
 
-
     # optimizer = tf.keras.optimizers.Adam(3e-4)
     # agent.compile(optimizer, tf.keras.losses.mse)
     # agent.fit(observation_memory, action_memory)
+    aantal_splits = int(len(action_memory) / batch_size)
+    print('aantal splits', aantal_splits)
+    obs_split = np.array_split(observation_memory, aantal_splits)
+    action_split = np.array_split(action_memory, aantal_splits)
+    decay_split = np.array_split(decayed_reward, aantal_splits)
 
-    obs_split = np.array_split(observation_memory, int(len(action_memory)/batch_size))
-    action_split = np.array_split(action_memory, int(len(action_memory)/batch_size))
-    decay_split = np.array_split(decayed_reward, int(len(action_memory)/batch_size))
-
-    for s in range(len(obs_split)):
-
+    for s in range(aantal_splits):
         with tf.GradientTape() as tape:
             predictions = agent(obs_split[s])
 
@@ -92,6 +89,6 @@ for __ in range(10):
         grads = tape.gradient(loss, train_vars)
         optimizer.apply_gradients(zip(grads, train_vars))
 
-#print(aantal_stappen)
-plt.plot(np.arange(1, len(aantal_stappen)+1), aantal_stappen)
+# print(aantal_stappen)
+plt.plot(np.arange(1, len(aantal_stappen) + 1), aantal_stappen)
 plt.show()
